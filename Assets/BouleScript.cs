@@ -18,6 +18,23 @@ public class BouleScript : MonoBehaviour {
 	void Start () {
         Debug.Log("teeest");
         sphereTransform = UnityEngine.Object.FindObjectsOfType<Transform>();
+
+        var red = Resources.Load("Materials/Red") as Material;
+        var blue = Resources.Load("Materials/Blue") as Material;
+
+        var blueBalls = ExtractBallsByMaterial(blue);
+        var redBalls = ExtractBallsByMaterial(red);
+
+        Double[] tab = buildTab(blueBalls, redBalls);
+        int elemsize = 3;
+        int elem = blueBalls.Count + redBalls.Count;
+
+        Debug.Log(elemsize);
+        Debug.Log(elem);
+        Debug.Log(tab);
+
+
+
         var rng = new System.Random();
         foreach (var sphere in sphereTransform)
         {
@@ -37,8 +54,44 @@ public class BouleScript : MonoBehaviour {
         }*/
     }
 	
-	// Update is called once per frame
-	void Update () {
+    private List<Transform> ExtractBallsByMaterial(Material material)
+    {
+        List<Transform> balls = new List<Transform>();
+        foreach(var ball in sphereTransform)
+        {
+            if (ball.GetComponent<Renderer>() != null)
+            {
+                if (ball.GetComponent<Renderer>().material.color == material.color)
+                    balls.Add(ball);
+            }
+        }
+        return balls;
+    }
+
+    private Double[] buildTab(List<Transform> blueBalls, List<Transform> redBalls)
+    {
+        int elemcount = (blueBalls.Count + redBalls.Count) * 3;
+        Double[] returnBalls = new Double[elemcount];
+        for(int i=0; i< blueBalls.Count + redBalls.Count; i++)
+        {
+            if(i< blueBalls.Count)
+            {
+                returnBalls[i] = blueBalls[i].position.x;
+                returnBalls[i + 1] = blueBalls[i].position.y;
+                returnBalls[i + 2] = (double)1;
+            }
+            else
+            {
+                returnBalls[i] = redBalls[i - blueBalls.Count].position.x;
+                returnBalls[i+1] = redBalls[i - blueBalls.Count].position.y;
+                returnBalls[i + 2] = (double)-1;
+            }
+        }
+        return returnBalls;
+    }
+
+    // Update is called once per frame
+    void Update () {
 		
 	}
 }
