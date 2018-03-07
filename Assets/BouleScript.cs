@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 
@@ -27,7 +28,7 @@ public class BouleScript : MonoBehaviour {
         var redBalls = ExtractBallsByMaterial(red);
         var whiteBalls = ExtractBallsByMaterial(white);
 
-        Double[] tab = buildTab(blueBalls, redBalls);
+        double[] tab = buildTab(blueBalls, redBalls);
         int elemsize = 3;
         int elem = blueBalls.Count + redBalls.Count;
 
@@ -38,9 +39,22 @@ public class BouleScript : MonoBehaviour {
         Debug.Log(elem);
         Debug.Log(tab);
 
-        double[] W = { 0.71, -0.44, 0.12 };
+        //double[] W = { 0.71, -0.44, 0.12 };
+        System.IntPtr WP = DemoCPPTOUnityLibWrapper.linear_create();
 
-        foreach(var ball in whiteBalls)
+        double[] Wtt = new double[3];
+        
+        Marshal.Copy(WP, Wtt, 0, 3);
+        Debug.Log("WTtt[0]:" + Wtt[0]);
+
+        DemoCPPTOUnityLibWrapper.linear_train_classification(WP, elem, elemsize, tab);
+        double[] W = new double[3];
+
+        Marshal.Copy(WP, W, 0, 3);
+        Debug.Log("WT[0]:" + W[0]);
+        
+
+        foreach (var ball in whiteBalls)
         {
             var ballObj = sphereTransform[ball];
             var vector = new Vector3(ballObj.position.x, ballObj.position.y, ballObj.position.z);

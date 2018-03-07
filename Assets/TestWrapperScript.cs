@@ -6,6 +6,6 @@ public class TestWrapperScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        Debug.Log(DemoCPPTOUnityLibWrapper.add_to_42(51));
+        //Debug.Log(DemoCPPTOUnityLibWrapper.add_to_42(51));
 	}
 }
