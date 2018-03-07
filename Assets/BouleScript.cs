@@ -21,25 +21,42 @@ public class BouleScript : MonoBehaviour {
 
         var red = Resources.Load("Materials/Red") as Material;
         var blue = Resources.Load("Materials/Blue") as Material;
+        var white = Resources.Load("Materials/White") as Material;
 
         var blueBalls = ExtractBallsByMaterial(blue);
         var redBalls = ExtractBallsByMaterial(red);
+        var whiteBalls = ExtractBallsByMaterial(white);
 
         Double[] tab = buildTab(blueBalls, redBalls);
         int elemsize = 3;
         int elem = blueBalls.Count + redBalls.Count;
 
+        Debug.Log("Rouge: " + redBalls.Count);
+        Debug.Log("Bleu: " + blueBalls.Count);
+        Debug.Log("Blanches: " + whiteBalls.Count);
         Debug.Log(elemsize);
         Debug.Log(elem);
         Debug.Log(tab);
 
+        double[] W = { 0.71, -0.44, 0.12 };
+
+        foreach(var ball in whiteBalls)
+        {
+            var ballObj = sphereTransform[ball];
+            var vector = new Vector3(ballObj.position.x, ballObj.position.y, ballObj.position.z);
+            vector.y = (float) ((-W[0] * -W[1] * Convert.ToDouble(vector.x)) / W[2]);
+            sphereTransform[ball].position = vector;
+        }
 
 
-        var rng = new System.Random();
+
+
+
+        /*var rng = new System.Random();
         foreach (var sphere in sphereTransform)
         {
             sphere.position += Vector3.up * (float)rng.Next(1, 30)/10;
-        }
+        }*/
         /*
         sphereTransform[0].position += Vector3.down * 2f;
         sphereTransform[1].position += Vector3.up * 2f;
@@ -54,21 +71,21 @@ public class BouleScript : MonoBehaviour {
         }*/
     }
 	
-    private List<Transform> ExtractBallsByMaterial(Material material)
+    private List<int> ExtractBallsByMaterial(Material material)
     {
-        List<Transform> balls = new List<Transform>();
-        foreach(var ball in sphereTransform)
+        List<int> balls = new List<int>();
+        for (int i=0; i<sphereTransform.Length; i++)
         {
-            if (ball.GetComponent<Renderer>() != null)
+            if (sphereTransform[i].GetComponent<Renderer>() != null)
             {
-                if (ball.GetComponent<Renderer>().material.color == material.color)
-                    balls.Add(ball);
+                if (sphereTransform[i].GetComponent<Renderer>().material.color == material.color)
+                    balls.Add(i);
             }
         }
         return balls;
     }
 
-    private Double[] buildTab(List<Transform> blueBalls, List<Transform> redBalls)
+    private Double[] buildTab(List<int> blueBalls, List<int> redBalls)
     {
         int elemcount = (blueBalls.Count + redBalls.Count) * 3;
         Double[] returnBalls = new Double[elemcount];
@@ -76,14 +93,14 @@ public class BouleScript : MonoBehaviour {
         {
             if(i< blueBalls.Count)
             {
-                returnBalls[i] = blueBalls[i].position.x;
-                returnBalls[i + 1] = blueBalls[i].position.y;
+                returnBalls[i] = sphereTransform[blueBalls[i]].position.x;
+                returnBalls[i + 1] = sphereTransform[blueBalls[i]].position.y;
                 returnBalls[i + 2] = (double)1;
             }
             else
             {
-                returnBalls[i] = redBalls[i - blueBalls.Count].position.x;
-                returnBalls[i+1] = redBalls[i - blueBalls.Count].position.y;
+                returnBalls[i] = sphereTransform[redBalls[i - blueBalls.Count]].position.x;
+                returnBalls[i + 1] = sphereTransform[redBalls[i - blueBalls.Count]].position.y;
                 returnBalls[i + 2] = (double)-1;
             }
         }
