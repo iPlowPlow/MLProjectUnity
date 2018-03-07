@@ -46,21 +46,45 @@ public class BouleScript : MonoBehaviour {
         
         Marshal.Copy(WP, Wtt, 0, 3);
         Debug.Log("WTtt[0]:" + Wtt[0]);
+        Debug.Log("WTtt[1]:" + Wtt[1]);
+        Debug.Log("WTtt[2]:" + Wtt[2]);
 
         DemoCPPTOUnityLibWrapper.linear_train_classification(WP, elem, elemsize, tab);
         double[] W = new double[3];
 
         Marshal.Copy(WP, W, 0, 3);
-        Debug.Log("WT[0]:" + W[0]);
-        
+        Debug.Log("W[0]:" + W[0]);
+        Debug.Log("W[1]:" + W[1]);
+        Debug.Log("W[2]:" + W[2]);
 
-        foreach (var ball in whiteBalls)
+        foreach(var ball in whiteBalls)
+        {
+            double test = DemoCPPTOUnityLibWrapper.linear_classify(WP, sphereTransform[ball].position.x, sphereTransform[ball].position.z);
+            Debug.Log("value double" + +test);
+            Debug.Log("Pos y before: " +sphereTransform[ball].position.y);
+            if (test > 0)
+            {
+                Debug.Log("==");
+                sphereTransform[ball].position += Vector3.up * (float)2f;
+            }
+            else
+            {
+                Debug.Log("!=");
+                sphereTransform[ball].position += Vector3.down * 2f;
+            }
+
+            Debug.Log("Pos y after: " + sphereTransform[ball].position.y);
+
+        }
+        DemoCPPTOUnityLibWrapper.linear_delete(WP);
+
+        /*foreach (var ball in whiteBalls)
         {
             var ballObj = sphereTransform[ball];
             var vector = new Vector3(ballObj.position.x, ballObj.position.y, ballObj.position.z);
             vector.y = (float) ((-W[0] * -W[1] * Convert.ToDouble(vector.x)) / W[2]);
             sphereTransform[ball].position = vector;
-        }
+        }*/
 
 
 
@@ -103,20 +127,27 @@ public class BouleScript : MonoBehaviour {
     {
         int elemcount = (blueBalls.Count + redBalls.Count) * 3;
         Double[] returnBalls = new Double[elemcount];
-        for(int i=0; i< blueBalls.Count + redBalls.Count; i++)
+        for(int i=0; i< elemcount; i+=3)
         {
-            if(i< blueBalls.Count)
+            Debug.Log("index: "+ i);
+            if(i< (blueBalls.Count*3))
             {
                 returnBalls[i] = sphereTransform[blueBalls[i]].position.x;
-                returnBalls[i + 1] = sphereTransform[blueBalls[i]].position.y;
-                returnBalls[i + 2] = (double)1;
+                returnBalls[i + 1] = sphereTransform[blueBalls[i]].position.z;
+                returnBalls[i + 2] = (double)-1;
+                Debug.Log("blue: x:" + returnBalls[i] + " y: " + returnBalls[i + 1] + " val: " + returnBalls[i + 2] + " i: "+ i);
             }
             else
             {
-                returnBalls[i] = sphereTransform[redBalls[i - blueBalls.Count]].position.x;
-                returnBalls[i + 1] = sphereTransform[redBalls[i - blueBalls.Count]].position.y;
-                returnBalls[i + 2] = (double)-1;
+                returnBalls[i] = sphereTransform[redBalls[i/3 - blueBalls.Count]].position.x;
+                returnBalls[i + 1] = sphereTransform[redBalls[i/3 - blueBalls.Count]].position.z;
+                returnBalls[i + 2] = (double)1;
+                Debug.Log("red: x:" + returnBalls[i] + " y: " + returnBalls[i + 1] + " val: " + returnBalls[i + 2] + " i: " + i);
             }
+        }
+        for(int j=0; j<elemcount; j++)
+        {
+            Debug.Log(returnBalls[j]);
         }
         return returnBalls;
     }
