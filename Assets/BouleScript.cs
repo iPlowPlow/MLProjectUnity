@@ -65,12 +65,12 @@ public class BouleScript : MonoBehaviour {
             if (test > 0)
             {
                 Debug.Log("==");
-                sphereTransform[ball].position += Vector3.up * (float)2f;
+                sphereTransform[ball].position += Vector3.up * 1f;
             }
             else
             {
                 Debug.Log("!=");
-                sphereTransform[ball].position += Vector3.down * 2f;
+                sphereTransform[ball].position += Vector3.down * 1f;
             }
 
             Debug.Log("Pos y after: " + sphereTransform[ball].position.y);
