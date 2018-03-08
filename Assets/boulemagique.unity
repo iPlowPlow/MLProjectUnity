@@ -314,6 +314,8 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  iter: 10000
+  alpha: 0.01
 --- !u!4 &84639667
 Transform:
   m_ObjectHideFlags: 0

@@ -14,9 +14,13 @@ public class BouleScript : MonoBehaviour {
 
     [SerializeField]
     private Transform[] sphereTransform;
+    [SerializeField]
+    private int iter;
+    [SerializeField]
+    private double alpha;
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start () {
         Debug.Log("teeest");
         sphereTransform = UnityEngine.Object.FindObjectsOfType<Transform>();
 
@@ -27,14 +31,15 @@ public class BouleScript : MonoBehaviour {
         var blueBalls = ExtractBallsByMaterial(blue);
         var redBalls = ExtractBallsByMaterial(red);
         var whiteBalls = ExtractBallsByMaterial(white);
+        Debug.Log("Rouge: " + redBalls.Count);
+        Debug.Log("Bleu: " + blueBalls.Count);
+        Debug.Log("Blanches: " + whiteBalls.Count);
 
         double[] tab = buildTab(blueBalls, redBalls);
         int elemsize = 3;
         int elem = blueBalls.Count + redBalls.Count;
 
-        Debug.Log("Rouge: " + redBalls.Count);
-        Debug.Log("Bleu: " + blueBalls.Count);
-        Debug.Log("Blanches: " + whiteBalls.Count);
+        
         Debug.Log(elemsize);
         Debug.Log(elem);
         Debug.Log(tab);
@@ -49,7 +54,7 @@ public class BouleScript : MonoBehaviour {
         Debug.Log("WTtt[1]:" + Wtt[1]);
         Debug.Log("WTtt[2]:" + Wtt[2]);
 
-        DemoCPPTOUnityLibWrapper.linear_train_classification(WP, elem, elemsize, tab);
+        DemoCPPTOUnityLibWrapper.linear_train_classification(WP, elem, elemsize, tab, alpha, iter);
         double[] W = new double[3];
 
         Marshal.Copy(WP, W, 0, 3);
@@ -132,8 +137,8 @@ public class BouleScript : MonoBehaviour {
             Debug.Log("index: "+ i);
             if(i< (blueBalls.Count*3))
             {
-                returnBalls[i] = sphereTransform[blueBalls[i]].position.x;
-                returnBalls[i + 1] = sphereTransform[blueBalls[i]].position.z;
+                returnBalls[i] = sphereTransform[blueBalls[i/3]].position.x;
+                returnBalls[i + 1] = sphereTransform[blueBalls[i/3]].position.z;
                 returnBalls[i + 2] = (double)-1;
                 Debug.Log("blue: x:" + returnBalls[i] + " y: " + returnBalls[i + 1] + " val: " + returnBalls[i + 2] + " i: "+ i);
             }
