@@ -18,6 +18,8 @@ public class BouleScript : MonoBehaviour {
     private int iter;
     [SerializeField]
     private double alpha;
+    [SerializeField]
+    private int type;
 
     // Use this for initialization
     void Start () {
@@ -53,35 +55,57 @@ public class BouleScript : MonoBehaviour {
         Debug.Log("WTtt[0]:" + Wtt[0]);
         Debug.Log("WTtt[1]:" + Wtt[1]);
         Debug.Log("WTtt[2]:" + Wtt[2]);
-
-        DemoCPPTOUnityLibWrapper.linear_train_classification(WP, elem, elemsize, tab, alpha, iter);
-        double[] W = new double[3];
-
-        Marshal.Copy(WP, W, 0, 3);
-        Debug.Log("W[0]:" + W[0]);
-        Debug.Log("W[1]:" + W[1]);
-        Debug.Log("W[2]:" + W[2]);
-
-        foreach(var ball in whiteBalls)
+        switch (type)
         {
-            double test = DemoCPPTOUnityLibWrapper.linear_classify(WP, sphereTransform[ball].position.x, sphereTransform[ball].position.z);
-            Debug.Log("value double" + +test);
-            Debug.Log("Pos y before: " +sphereTransform[ball].position.y);
-            if (test > 0)
-            {
-                Debug.Log("==");
-                sphereTransform[ball].position += Vector3.up * 1f;
-            }
-            else
-            {
-                Debug.Log("!=");
-                sphereTransform[ball].position += Vector3.down * 1f;
-            }
+            case 0:
+                DemoCPPTOUnityLibWrapper.linear_train_classification(WP, elem, elemsize, tab, alpha, iter);
+                double[] W = new double[3];
 
-            Debug.Log("Pos y after: " + sphereTransform[ball].position.y);
+                Marshal.Copy(WP, W, 0, 3);
+                Debug.Log("W[0]:" + W[0]);
+                Debug.Log("W[1]:" + W[1]);
+                Debug.Log("W[2]:" + W[2]);
 
+                foreach (var ball in whiteBalls)
+                {
+                    double test = DemoCPPTOUnityLibWrapper.linear_classify(WP, sphereTransform[ball].position.x, sphereTransform[ball].position.z);
+                    Debug.Log("value double" + +test);
+                    Debug.Log("Pos y before: " + sphereTransform[ball].position.y);
+                    if (test > 0)
+                    {
+                        Debug.Log("==");
+                        sphereTransform[ball].position += Vector3.up * 1f;
+                    }
+                    else
+                    {
+                        Debug.Log("!=");
+                        sphereTransform[ball].position += Vector3.down * 1f;
+                    }
+
+                    Debug.Log("Pos y after: " + sphereTransform[ball].position.y);
+
+                }
+                DemoCPPTOUnityLibWrapper.linear_delete(WP);
+                break;
+            case 1:
+                DemoCPPTOUnityLibWrapper.linear_train_regression(WP, elem, elemsize, tab);
+                double[] Wtab = new double[3];
+                Marshal.Copy(WP, Wtab, 0, 3);
+                Debug.Log("Wtab[0]:" + Wtab[0]);
+                Debug.Log("Wtab[1]:" + Wtab[1]);
+                Debug.Log("Wtab[2]:" + Wtab[2]);
+                foreach (var ball in whiteBalls)
+                {
+                    var ballObj = sphereTransform[ball];
+                    var vector = new Vector3(ballObj.position.x, ballObj.position.y, ballObj.position.z);
+                    //y = w0 + w1x1 + w2x2
+                    vector.y = (float)(Wtab[0] + Wtab[1] * Convert.ToDouble(vector.x) + Wtab[2]* Convert.ToDouble(vector.z));
+                    sphereTransform[ball].position = vector;
+                }
+                break;
+            default:
+                break;
         }
-        DemoCPPTOUnityLibWrapper.linear_delete(WP);
 
         /*foreach (var ball in whiteBalls)
         {
@@ -139,14 +163,14 @@ public class BouleScript : MonoBehaviour {
             {
                 returnBalls[i] = sphereTransform[blueBalls[i/3]].position.x;
                 returnBalls[i + 1] = sphereTransform[blueBalls[i/3]].position.z;
-                returnBalls[i + 2] = (double)-1;
+                returnBalls[i + 2] = (type==0)? (double)-1 : sphereTransform[blueBalls[i / 3]].position.y;
                 Debug.Log("blue: x:" + returnBalls[i] + " y: " + returnBalls[i + 1] + " val: " + returnBalls[i + 2] + " i: "+ i);
             }
             else
             {
                 returnBalls[i] = sphereTransform[redBalls[i/3 - blueBalls.Count]].position.x;
                 returnBalls[i + 1] = sphereTransform[redBalls[i/3 - blueBalls.Count]].position.z;
-                returnBalls[i + 2] = (double)1;
+                returnBalls[i + 2] = (type == 0) ? (double)1 : sphereTransform[redBalls[i / 3 - blueBalls.Count]].position.y;
                 Debug.Log("red: x:" + returnBalls[i] + " y: " + returnBalls[i + 1] + " val: " + returnBalls[i + 2] + " i: " + i);
             }
         }
