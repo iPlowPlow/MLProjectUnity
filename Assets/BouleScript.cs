@@ -20,6 +20,8 @@ public class BouleScript : MonoBehaviour {
     private double alpha;
     [SerializeField]
     private int type;
+    [SerializeField]
+    private double gamma;
 
     // Use this for initialization
     void Start () {
@@ -29,10 +31,13 @@ public class BouleScript : MonoBehaviour {
         var red = Resources.Load("Materials/Red") as Material;
         var blue = Resources.Load("Materials/Blue") as Material;
         var white = Resources.Load("Materials/White") as Material;
+        var green = Resources.Load("Materials/Green") as Material;
 
         var blueBalls = ExtractBallsByMaterial(blue);
         var redBalls = ExtractBallsByMaterial(red);
         var whiteBalls = ExtractBallsByMaterial(white);
+        var greenBalls = ExtractBallsByMaterial(green);
+
         Debug.Log("Rouge: " + redBalls.Count);
         Debug.Log("Bleu: " + blueBalls.Count);
         Debug.Log("Blanches: " + whiteBalls.Count);
@@ -47,7 +52,7 @@ public class BouleScript : MonoBehaviour {
         Debug.Log(tab);
 
         //double[] W = { 0.71, -0.44, 0.12 };
-        System.IntPtr WP = DemoCPPTOUnityLibWrapper.linear_create();
+        System.IntPtr WP = DemoCPPTOUnityLibWrapper.linear_create(type, elem);
 
         double[] Wtt = new double[3];
         
@@ -100,6 +105,28 @@ public class BouleScript : MonoBehaviour {
                     var vector = new Vector3(ballObj.position.x, ballObj.position.y, ballObj.position.z);
                     //y = w0 + w1x1 + w2x2
                     vector.y = (float)(Wtab[0] + Wtab[1] * Convert.ToDouble(vector.x) + Wtab[2]* Convert.ToDouble(vector.z));
+                    sphereTransform[ball].position = vector;
+                }
+                break;
+            case 2:
+                Debug.Log(gamma);
+                DemoCPPTOUnityLibWrapper.linear_train_RBF(WP, elem, elemsize, tab, gamma);
+                double[] WRBF = new double[elem];
+                Marshal.Copy(WP, WRBF, 0, 3);
+                for(int i=0; i<elem; i++)
+                {
+                    Debug.Log("WRBF["+i+"]: " + WRBF[i]);
+                }
+                /*Debug.Log("WRBF[0]:" + WRBF[0]);
+                Debug.Log("WRBF[1]:" + WRBF[1]);
+                Debug.Log("WRBF[2]:" + WRBF[2]);*/
+                foreach (var ball in whiteBalls)
+                {
+                    var ballObj = sphereTransform[ball];
+                    var vector = new Vector3(ballObj.position.x, ballObj.position.y, ballObj.position.z);
+                    double[] xz = { vector.x, vector.z };
+                    //y = w0 + w1x1 + w2x2
+                    vector.y = (float)DemoCPPTOUnityLibWrapper.execute_RBF(WP, xz, tab, elem, elemsize, gamma);
                     sphereTransform[ball].position = vector;
                 }
                 break;

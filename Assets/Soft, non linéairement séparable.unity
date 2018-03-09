@@ -10983,6 +10983,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sphereTransform: []
+  iter: 10000
+  alpha: 0.01
+  type: 0
+  gamma: 1
 --- !u!4 &2124548560
 Transform:
   m_ObjectHideFlags: 0
